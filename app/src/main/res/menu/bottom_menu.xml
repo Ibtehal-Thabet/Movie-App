@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_main"
+        android:icon="@drawable/btn_1"
+        android:title="Home"
+        android:iconTint="@color/nav_item_color"/>
+
+    <item
+        android:id="@+id/nav_fav"
+        android:icon="@drawable/btn_2"
+        android:title="Favorite"
+        android:iconTint="@color/nav_item_color"/>
+
+<!--    <item-->
+<!--        android:id="@+id/nav_calendar"-->
+<!--        android:icon="@drawable/ic_calendar_month"-->
+<!--        android:title="WatchList"-->
+<!--        android:iconTint="@color/nav_item_color"/>-->
+
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/btn_4"
+        android:title="Profile"
+        android:iconTint="@color/nav_item_color"/>
+
+</menu>
