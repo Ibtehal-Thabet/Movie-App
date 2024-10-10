@@ -296,6 +296,7 @@ public class MoviesMainActivity extends AppCompatActivity {
         if (SpeechRecognizer.isRecognitionAvailable(this)) {
             speechRecognizer.startListening(speechRecognizerIntent);
         } else {
+            searchET.setText("Search Movies...");
             Toast.makeText(this, "Speech recognition not available on this device", Toast.LENGTH_SHORT).show();
         }
     }

@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,6 +35,8 @@ public class FavoriteFragment extends Fragment {
     private Button loginFav;
     private RequestQueue queue;
     private DatabaseHelper databaseHelper;
+    private String userId;
+    private List<MovieItem> movies;
     private StringRequest stringSliderRequest, stringRequestPopular, stringRequestUpcoming;
 
     TokenManager tokenManager;
@@ -67,24 +70,24 @@ public class FavoriteFragment extends Fragment {
 
         loginFav = view.findViewById(R.id.loginFav);
 
-        String userId = tokenManager.getUserId();
+        userId = tokenManager.getUserId();
 
-        databaseHelper = new DatabaseHelper(requireActivity());
-//        MoviePreferences moviePreferences = new MoviePreferences();
-        List<MovieItem> movies = new ArrayList<>();
-        if (userId != null) {
-            movies = databaseHelper.getFavoriteMoviesByUser(userId);
-            loginFav.setVisibility(View.GONE);
-        } else {
+        if (userId == null) {
             loginFav.setVisibility(View.VISIBLE);
             loginFav.setOnClickListener(v -> {
                 Intent intent = new Intent(getActivity(), LoginActivity.class);
                 startActivity(intent);
             });
+            recyclerViewFavMovies.setVisibility(View.GONE);
+            emptyLayout.setVisibility(View.VISIBLE);
+            return;
         }
-//                moviePreferences.getFavoriteMovies(requireActivity(), refreshToken);
 
-        adapterFavMovies = new FavoriteMoviesAdapter(movies);
+        movies = new ArrayList<>();
+
+        databaseHelper = new DatabaseHelper(requireActivity());
+        movies = databaseHelper.getFavoriteMoviesByUser(userId);
+        adapterFavMovies = new FavoriteMoviesAdapter(movies, this::onRemoveFavorite);
         recyclerViewFavMovies.setAdapter(adapterFavMovies);
 
         countFavItems = view.findViewById(R.id.countTV);
@@ -97,5 +100,22 @@ public class FavoriteFragment extends Fragment {
             recyclerViewFavMovies.setVisibility(View.VISIBLE);
             emptyLayout.setVisibility(View.GONE);
         }
+    }
+
+    public void onRemoveFavorite(int movieId) {
+        databaseHelper.removeFavoriteMovie(userId, movieId);
+        movies = databaseHelper.getFavoriteMoviesByUser(userId);
+
+        countFavItems.setText("Favorite Items: " + movies.size());
+        adapterFavMovies = new FavoriteMoviesAdapter(movies, this::onRemoveFavorite);
+        recyclerViewFavMovies.setAdapter(adapterFavMovies);
+
+        if (movies.isEmpty()) {
+            recyclerViewFavMovies.setVisibility(View.GONE);
+            emptyLayout.setVisibility(View.VISIBLE);
+        }
+
+        adapterFavMovies.notifyItemRemoved(movies.indexOf(movieId));
+        Toast.makeText(requireActivity(), "Movie removed from favorite successfully", Toast.LENGTH_SHORT).show();
     }
 }
