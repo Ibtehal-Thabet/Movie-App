@@ -12,6 +12,7 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -74,18 +75,21 @@ public class MoviesMainActivity extends AppCompatActivity {
 
         micBtn.setOnClickListener(v -> {
             searchBtn.setImageResource(R.drawable.ic_arrow_back);
-            searchET.findFocus();
+            searchET.requestFocus();
             checkAudioPermission();
             startSpeechToText();
         });
 
         final Fragment[] lastFragment = new Fragment[1];
         searchET.setOnFocusChangeListener((v, hasFocus) -> {
-            lastFragment[0] = getCurrentFragment();
+//            lastFragment[0] = getCurrentFragment();
             if (hasFocus) {
+                lastFragment[0] = getCurrentFragment();
+
+                bottomNavigationView.setVisibility(View.GONE);
+                pushSearchFragment(searchET.getText().toString());
 
                 searchBtn.setImageResource(R.drawable.ic_arrow_back);
-
                 searchBtn.setOnClickListener(v1 -> {
                     searchET.clearFocus();
                     searchET.setText("");
@@ -93,15 +97,13 @@ public class MoviesMainActivity extends AppCompatActivity {
                     getSupportFragmentManager().popBackStack(lastFragment[0].getTag(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
                     speechRecognizer.destroy();
                 });
-
-                bottomNavigationView.setVisibility(View.GONE);
-                pushSearchFragment(searchET.getText().toString());
             } else {
                 if (lastFragment[0] != null) {
                     pushFragment(lastFragment[0], lastFragment[0].getTag());
                 } else {
                     pushFragment(new MainFragment(), lastFragment[0].getTag());
                 }
+
                 searchBtn.setImageResource(R.drawable.search);
                 bottomNavigationView.setVisibility(View.VISIBLE);
             }
@@ -271,6 +273,7 @@ public class MoviesMainActivity extends AppCompatActivity {
                     }
                 }
                 searchET.setText("");
+                searchET.setHint("Search Movies...");
                 searchET.clearFocus();
                 Toast.makeText(MoviesMainActivity.this, "Error occurred: " + message, Toast.LENGTH_SHORT).show();
             }
@@ -296,7 +299,7 @@ public class MoviesMainActivity extends AppCompatActivity {
         if (SpeechRecognizer.isRecognitionAvailable(this)) {
             speechRecognizer.startListening(speechRecognizerIntent);
         } else {
-            searchET.setText("Search Movies...");
+            searchET.setHint("Search Movies...");
             Toast.makeText(this, "Speech recognition not available on this device", Toast.LENGTH_SHORT).show();
         }
     }
